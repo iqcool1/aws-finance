@@ -1,5 +1,5 @@
 #packages
-list.of.packages <- c( "dplyr","httr", "zoo")
+list.of.packages <- c( "dplyr","httr", "zoo", "readr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages,repos = "http://cran.us.r-project.org")
 lapply(list.of.packages, require, character.only = TRUE)
@@ -7,11 +7,7 @@ lapply(list.of.packages, require, character.only = TRUE)
 
 
 #API
-api_interval <- 15*60
-api_history <- "180d"
-api_stock_symbol <- "BANKNIFTY"
-api_exchange <- "NSE"
-check_days <- 8
+source("intialisation.R")
 response<-httr::GET(paste0("https://www.google.com/finance/getprices?f=d%2Cc%2Ch%2Cl%2Co%2Cv",
                            "&i=", api_interval,
                            "&p=", api_history,
@@ -50,10 +46,10 @@ df <-
   select(timestamp, open, high, low, close, volume)
 
 
-#constants
-runtime <- Sys.time()
-
-open_interval <- as.POSIXct(as.character(as.Date(runtime))) + (9*60*60) + (15*60)
-close_interval <- open_interval + (6*60*60) + (15*60)
-current_interval <- as.POSIXct(as.character(runtime)) - (as.numeric(as.POSIXct(as.character(runtime))) %% (15*60))
-previous_interval <- current_interval - (15*60)
+# constants
+# runtime <- Sys.time()
+# 
+# open_interval <- as.POSIXct(as.character(as.Date(runtime))) + (9*60*60) + (15*60)
+# close_interval <- open_interval + (6*60*60) + (15*60)
+# current_interval <- as.POSIXct(as.character(runtime)) - (as.numeric(as.POSIXct(as.character(runtime))) %% (15*60))
+# previous_interval <- current_interval - (15*60)

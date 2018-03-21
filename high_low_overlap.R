@@ -1,5 +1,5 @@
 source("data_extract_google.R")
-#inputs = df, api_interval, check_days
+#inputs = df, api_interval, forecast_horizon
 
 patterns <-
   df %>% 
@@ -26,12 +26,13 @@ patterns <-
          pattern_type = ifelse(pattern_flag == 1 & lag(high) < high, "H", ifelse(pattern_flag == 1 & lag(low) > low, "L", "N"))) %>% 
   arrange(desc(timestamp)) %>%  
   as.data.frame(stringsAsFactors=F) %>% 
-  mutate(seven_day_high = rollapplyr(high, check_days*(6.25*60*60)/api_interval, max, fill = "NA", partial = T),
-         seven_day_low = rollapplyr(low, check_days*(6.25*60*60)/api_interval, min, fill = "NA", partial = T)) %>%  
+  mutate(forecast_horizon_high = rollapplyr(high, forecast_horizon*(6.25*60*60)/api_interval, max, fill = "NA", partial = T),
+         forecast_horizon_low = rollapplyr(low, forecast_horizon*(6.25*60*60)/api_interval, min, fill = "NA", partial = T)) %>%  
   arrange(timestamp)
 
 breakouts <- 
   patterns %>% 
   filter(pattern_type %in% c("H", "L")) %>% 
-  mutate(pass = ifelse((pattern_type == "H" & seven_day_high >= high + 2*(open_high-open_low))
-                       | (pattern_type == "L" & seven_day_low <= low - 2*(open_high-open_low)), 1, 0))
+  mutate(pass = ifelse((pattern_type == "H" & forecast_horizon_high >= high + 2*(open_high-open_low))
+                       | (pattern_type == "L" & forecast_horizon_low <= low - 2*(open_high-open_low)), 1, 0),
+         stock_symbol = api_stock_symbol)
